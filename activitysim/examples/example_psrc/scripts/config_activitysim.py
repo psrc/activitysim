@@ -78,14 +78,14 @@ age_map = {
 }
 
 gender_map = {
-    1: 1,    # male: male
-    2: 2,    # female: female
-    3: 9,    # another: missing
-    4: 9     # prefer not to answer: missing
+    'Male': 1,    # male: male
+    'Female': 2,    # female: female
+    'Another': 9,    # another: missing
+    'Prefer not to answer' : 9     # prefer not to answer: missing
 }
 
 student_map = {
-    'No, not a student': 0,
+    'No, not a student': 3,
     'Full-time student': 1,
     'Part-time student': 2,
     'Missing: Skip Logic': -1
@@ -211,20 +211,54 @@ hhrestype_map = {'Single-family house (detached house)': 1,
                  'Dorm or institutional housing': 5
                  }
 
-# Use the midpoint of the ranges provided since DaySim uses actual values
+# Use the midpoint of the ranges provided 
+
 income_map = {
-    1: 5000,
-    2: 17500,
-    3: 30000,
-    4: 42500,
-    5: 62500,
-    6: 87500,
-    7: 125000,
-    8: 175000,
-    9: 225000,
-    10: 250000,
-    11: -1
-}
+    'Under $10,000': 5000,
+    '$10,000-$24,999': 17500,
+    '$25,000-$34,999': 30000,
+    '$35,000-$49,999': 42500,
+    '$50,000-$74,999': 62500,
+    '$75,000-$99,999': 87500,
+    '$100,000-$149,999': 125000,
+    '$150,000-$199,999': 175000,
+    '$200,000-$249,999': 225000,
+    '$250,000 or more':250000,
+    'Prefer not to answer': -1,
+        }
+
+vehicle_count_map = {
+    '0 (no vehicles)': 0,
+    '1 vehicle': 1, 
+    '2 vehicles': 2,
+    '3 vehicles': 3,
+    '4 vehicles': 4,
+    '5 vehicles': 5,
+    '6 vehicles': 6,
+    '7 vehicles': 7,
+    '8+ vehicles': 8
+         }
+
+hhsize_map = {
+    '1 person': 1,
+    '2 people': 2, 
+    '3 people': 3,
+    '4 people': 4, 
+    '5 people': 5,
+    '6 people': 6,
+    '7 people': 7,
+    '8 people': 8,
+    '9 people': 9
+         }
+
+is_mf_map = {
+    'Other (including boat, RV, van, etc.)': 0,
+    'Single-family house (detached house)': 0,
+    'Building with 4 or more apartments/condos': 1,
+    'Townhouse (attached house)': 1,
+    'Building with 3 or fewer apartments/condos': 1,
+    'Mobile home/trailer': 0,
+    'Dorm or institutional housing': 1}
 
 race_dict = {
     'African American': 2,

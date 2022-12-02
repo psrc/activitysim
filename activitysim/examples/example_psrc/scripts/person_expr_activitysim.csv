@@ -1,17 +1,17 @@
 ﻿index,table ,filter,result_col,result_value,description
-1,person,:,school_taz,person[school_parcel].fillna(-1).apply(lambda x: parcel_maz_dict[x]),get school MAZ from parcel lookup
-2,person,:,work_taz,person[work_parcel].fillna(-1).apply(lambda x: parcel_maz_dict[x]),get work MAZ from parcel lookup
+1,person,person['work_lat'] > 0,workplace_zone_id,0
+2,person,person['school_loc_lat'] > 0,school_zone_id,0
 3,person,:,age,person['age'].map(age_map),
 4,person,:,sex,person['gender'].map(gender_map),
 5,person,:,student,person['student'].map(student_map).fillna(0),
 9,person,"person['employment'] == 'Employed full time (35+ hours/week, paid)'",ptype,1,Full time worker
 10,person,"person['employment'].isin(['Employed part time (fewer than 35 hours/week, paid)', 'Self-employed'])",ptype,2,Part time worker (includes part time worker and self-employed people
-11,person,"(person['schooltype'].isin([6,7])) & (person['student'] == 3)",ptype,3,college student
-12,person,"(person['worker'] == 0) &  (person['age'].isin([10,11,12]))",ptype,4,Non working adult age <65
-13,person,"(person['worker'] == 0) &  (person['age'].isin([5,6,7,8,9]))",ptype,5, Non-working adult age 65+
-14,person,"(person['age'] >= 4) & (person['schooltype'].isin([3,4,5]))",ptype,6,driving age student
-15,person,"person['age'].isin([2,3])",ptype,7,non-driving age student
-16,person,person['age']==1,ptype,8,child too young for school
+11,person,"(person['schooltype'].isin(['College, graduate, or professional school','Vocational/technical school'])) & (person['student'] == 3)",ptype,3,college student
+12,person,"(person['worker'] == 'No jobs') & (person['age']<65)",ptype,4,Non working adult age <65
+13,person,"(person['worker'] == 'No jobs') & (person['age']>=65)",ptype,5, Non-working adult age 65+
+14,person,"(person['age'] >= 16) & (person['schooltype'].isin(['K-12 public school','K-12 private school']))",ptype,6,driving age student
+15,person,"(person['age'] < 16) & (person['schooltype'].isin(['K-12 public school','K-12 private school','Preschool']))",ptype,7,non-driving age student
+16,person,person['age'] < 5,ptype,8,child too young for school
 17,person,person['ptype'].isnull(),ptype,-1,Replace null values with -1 flag
 18,person,:,ptype,person['ptype'].astype('int'),
 19,person,:,pemploy,3,Set default value to Not in Labor Force
@@ -21,9 +21,9 @@
 23,person,:,pstudent,3,Set default student value to non-student
 24,person,"person['ptype'].isin([7,6])",pstudent,1,pre-k thruogh k12
 25,person,person['ptype']==5,pstudent,2,university/professional student
-26,person,(person['school_taz'] > 0) & (person['pstudent'] == 3) & (person['age'] < 18),pstudent,1,
-27,person,(person['school_taz'] > 0) & (person['pstudent'] == 3) & (person['age'] >= 18),pstudent,2,
-28,person,(person['school_taz'] < 0) & (person['pstudent'] != 3),pstudent,3,
+26,person,(person['school_zone_id'] > 0) & (person['pstudent'] == 3) & (person['age'] < 18),pstudent,1,
+27,person,(person['school_zone_id'] > 0) & (person['pstudent'] == 3) & (person['age'] >= 18),pstudent,2,
+28,person,(person['school_zone_id'] < 0) & (person['pstudent'] != 3),pstudent,3,
 29,person,(person['ptype'] == -1) & (person['pemploy'] ==3) & (person['age']>=65),ptype,3,Non-worker over 65
 30,person,(person['ptype'] == -1) & (person['student'] ==2) & (person['age']>18),ptype,5, university student 
 31,person,(person['ptype'] == -1) & (person['student'] < 3) & (person['age']<=18),ptype,6,high school student
@@ -31,7 +31,7 @@
 33,person,:,free_parking_at_work,0,set default parking at work to 0
 34,person,"person['workpass'].isin(['Yes, employer pays/reimburses for all or part of daily parking costs','Yes, employer pays/reimburses for all or part of parking pass'])",free_parking_at_work,1,update paid parking
 35,person,:,race,person['race_category'].map(race_dict),# Code race variables as values
-36,person,(person['work_taz'] > 0) & (person['pemploy'] >= 3) & (person['age'] >= 16),pemploy,2,
+36,person,(person['workplace_zone_id'] > 0) & (person['pemploy'] >= 3) & (person['age'] >= 16),pemploy,2,
 37,person,(person['ptype'] == 3) & (person['pemploy'] == 1),pemploy,2,
 38,person,(person['ptype'] == 4) & (person['pemploy'] == 2),ptype,2,
 39,person,(person['ptype'] == 5) & (person['pemploy'] == 2),ptype,2,

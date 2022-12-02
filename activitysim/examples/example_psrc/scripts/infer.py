@@ -441,20 +441,20 @@ def patch_tour_ids(persons, tours, joint_tour_participants):
 
     # joint tours tour_id was assigned based on person_id of the first person in household (PNUM == 1)
     # because the actual point person forthe tour is only identified later in joint_tour_participants)
-    temp_point_persons = persons.loc[persons.PNUM == 1, ["household_id"]]
-    temp_point_persons["person_id"] = temp_point_persons.index
-    temp_point_persons.set_index("household_id", inplace=True)
+    #temp_point_persons = persons.loc[persons.PNUM == 1, ["household_id"]]
+    #temp_point_persons["person_id"] = temp_point_persons.index
+    #temp_point_persons.set_index("household_id", inplace=True)
 
-    # patch person_id with value of temp_point_person_id and use it to set_tour_index
+    ## patch person_id with value of temp_point_person_id and use it to set_tour_index
     joint_tours = tours[tours.tour_category == "joint"]
-    joint_tours["cache_point_person_id"] = joint_tours["person_id"]
-    joint_tours["person_id"] = reindex(
-        temp_point_persons.person_id, joint_tours.household_id
-    )
+    #joint_tours["cache_point_person_id"] = joint_tours["person_id"]
+    #joint_tours["person_id"] = reindex(
+    #    temp_point_persons.person_id, joint_tours.household_id
+    #)
 
     joint_tours = set_tour_index(joint_tours, parent_tour_num_col=None, is_joint=True)
-    joint_tours["person_id"] = joint_tours["cache_point_person_id"]
-    del joint_tours["cache_point_person_id"]
+    #joint_tours["person_id"] = joint_tours["cache_point_person_id"]
+    #del joint_tours["cache_point_person_id"]
 
     # patch tour_id column in patched_joint_tour_participants
     patched_joint_tour_participants = joint_tour_participants.copy()

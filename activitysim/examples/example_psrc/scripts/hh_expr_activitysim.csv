@@ -2,11 +2,10 @@
 1,household,:,hhexpfac,hh[hh_weight],
 2,household,:,num_workers,hh['numworkers'],
 3,household,:,income,hh['hhincome_detailed'].map(income_map),
-4,household,:,auto_ownership,hh['vehicle_count'],
+4,household,:,auto_ownership,hh['vehicle_count'].map(vehicle_count_map),
 5,household,:,HHT,1,FIXME:  Set household type to 1 for now
-6,household,:,home_zone_id,hh[home_parcel].fillna(-1).astype('int').apply(lambda x: parcel_maz_dict[x]),
 7,household,:,hh_race,hh['hh_race_category'].map(race_dict),
 8,household,:,hownrent,hh['rent_own'].map(hownrent_map),
 9,household,:,hrestype,hh['res_type'].map(hhrestype_map),
-10,,:,is_mf,0,
-11,household,hh['mfunits']>0,is_mf,1,
+11,household,:,is_mf,hh['res_type'].map(is_mf_map)
+12,household,:,hhsize,hh['hhsize'].map(hhsize_map)

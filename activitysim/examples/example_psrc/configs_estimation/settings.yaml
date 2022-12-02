@@ -102,9 +102,9 @@ want_dest_choice_sample_tables: False
 households_sample_size:  0
 
 # to resume after last successful checkpoint, specify resume_after: _
-#resume_after: workplace_location
+#resume_after: mandatory_tour_frequency
 
-trace_hh_id:
+#trace_hh_id: 17103302
 
 
 output_tables:

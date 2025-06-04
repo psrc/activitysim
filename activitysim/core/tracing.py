@@ -567,8 +567,9 @@ def get_trace_target(df, slicer, column=None):
 
     traceable_table_indexes = inject.get_injectable("traceable_table_indexes", {})
     traceable_table_ids = inject.get_injectable("traceable_table_ids", {})
-
-    if df.empty:
+    
+    #if df.empty:
+    if len(df) == 0:
         target_ids = None
     elif slicer in traceable_table_indexes:
         # maps 'person_id' to 'persons', etc

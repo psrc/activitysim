@@ -1,5 +1,7 @@
 # ActivitySim
 # See full license in LICENSE.txt.
+from __future__ import annotations
+
 import numpy as np
 import numpy.testing as npt
 import pandas as pd
@@ -9,7 +11,6 @@ from activitysim.core import random
 
 
 def test_basic():
-
     rng = random.Random()
 
     rng.set_base_seed(0)
@@ -32,7 +33,6 @@ def test_basic():
 
 
 def test_channel():
-
     channels = {
         "households": "household_id",
         "persons": "person_id",

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # ActivitySim
 # See full license in LICENSE.txt.
 import os
@@ -12,7 +14,6 @@ if sys.version_info < (3, 7):
 
 
 def test_help():
-
     # cp = completed process
     cp = subprocess.run(["activitysim", "-h"], capture_output=True)
 
@@ -20,14 +21,12 @@ def test_help():
 
 
 def test_create_help():
-
     cp = subprocess.run(["activitysim", "create", "-h"], capture_output=True)
 
     assert "usage: activitysim create [-h] (-l | -e PATH) [-d PATH]" in str(cp.stdout)
 
 
 def test_create_list():
-
     cp = subprocess.run(["activitysim", "create", "--list"], capture_output=True)
 
     assert "Available examples" in str(cp.stdout)
@@ -35,7 +34,6 @@ def test_create_list():
 
 
 def test_create_copy():
-
     target = os.path.join(os.path.dirname(__file__), "test_example")
     cp = subprocess.run(
         [
@@ -59,7 +57,7 @@ def test_create_copy():
 
     assert os.path.exists(target)
     for folder in ["configs", "configs_mp", "data", "output"]:
-        assert os.path.isdir(os.path.join(target, folder))
+        assert os.path.isdir(os.path.join(target, "prototype_mtc", folder))
 
     # clean up
     shutil.rmtree(target)
@@ -67,21 +65,13 @@ def test_create_copy():
 
 
 def test_run():
-
     cp = subprocess.run(["activitysim", "run"], capture_output=True)
 
-    msg = (
-        "please specify either a --working_dir "
-        "containing 'configs', 'data', and 'output' "
-        "folders or all three of --config, --data, and --output"
-    )
-
     # expect error
-    assert msg in str(cp.stderr)
+    assert "missing" in str(cp.stderr)
 
 
 if __name__ == "__main__":
-
     test_help()
     test_create_help()
     test_create_list()

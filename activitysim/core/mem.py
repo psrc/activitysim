@@ -1,5 +1,6 @@
 # ActivitySim
 # See full license in LICENSE.txt.
+from __future__ import annotations
 
 import datetime
 import gc
@@ -14,7 +15,7 @@ import numpy as np
 import pandas as pd
 import psutil
 
-from activitysim.core import config, inject, util
+from activitysim.core import config, util, workflow
 
 logger = logging.getLogger(__name__)
 
@@ -44,28 +45,30 @@ def time_bin(timestamps):
     return pd.to_datetime(bin, unit="s", origin="unix")
 
 
-def consolidate_logs():
+def consolidate_logs(state: workflow.State):
     """
     Consolidate and aggregate subprocess mem logs
     """
 
-    if not config.setting("multiprocess", False):
+    if not state.settings.multiprocess:
         return
 
-    delete_originals = not config.setting("keep_mem_logs", False)
+    delete_originals = not state.settings.keep_mem_logs
     omnibus_df = []
 
     # for each multiprocess step
-    multiprocess_steps = config.setting("multiprocess_steps", [])
+    multiprocess_steps = state.settings.multiprocess_steps
+    if multiprocess_steps is not None:
+        multiprocess_steps = [i.dict() for i in multiprocess_steps]
     for step in multiprocess_steps:
         step_name = step.get("name", None)
 
         logger.debug(f"mem.consolidate_logs for step {step_name}")
 
-        glob_file_name = config.log_file_path(
+        glob_file_name = state.get_log_file_path(
             f"{step_name}*{MEM_LOG_FILE_NAME}", prefix=False
         )
-        glob_files = glob.glob(glob_file_name)
+        glob_files = glob.glob(str(glob_file_name))
 
         if not glob_files:
             continue
@@ -126,7 +129,7 @@ def consolidate_logs():
             util.delete_files(glob_files, f"mem.consolidate_logs.{step_name}")
 
         # write aggregate step log
-        output_path = config.log_file_path(f"mem_{step_name}.csv", prefix=False)
+        output_path = state.get_log_file_path(f"mem_{step_name}.csv", prefix=False)
         logger.debug(
             f"chunk.consolidate_logs writing step summary log for step {step_name} to {output_path}"
         )
@@ -138,13 +141,12 @@ def consolidate_logs():
     omnibus_df = pd.concat(omnibus_df)
     omnibus_df = omnibus_df.sort_values("time")
 
-    output_path = config.log_file_path(OMNIBUS_LOG_FILE_NAME, prefix=False)
+    output_path = state.get_log_file_path(OMNIBUS_LOG_FILE_NAME, prefix=False)
     logger.debug(f"chunk.consolidate_logs writing omnibus log to {output_path}")
     omnibus_df.to_csv(output_path, mode="w", index=False)
 
 
 def check_global_hwm(tag, value, label):
-
     assert value is not None
 
     hwm = GLOBAL_HWM.setdefault(tag, {})
@@ -161,7 +163,6 @@ def check_global_hwm(tag, value, label):
 
 
 def log_global_hwm():
-
     process_name = multiprocessing.current_process().name
 
     for tag in GLOBAL_HWM:
@@ -173,9 +174,11 @@ def log_global_hwm():
         )
 
 
-def trace_memory_info(event, trace_ticks=0, force_garbage_collect=False):
-
+def trace_memory_info(event, trace_ticks=0, force_garbage_collect=False, *, state):
     global MEM_TICK
+
+    if state is None:
+        raise ValueError("state cannot be None")
 
     tick = time.time()
     if trace_ticks and (tick - MEM_TICK < trace_ticks):
@@ -226,7 +229,6 @@ def trace_memory_info(event, trace_ticks=0, force_garbage_collect=False):
     noteworthy = check_global_hwm("uss", uss, event) or noteworthy
 
     if noteworthy:
-
         # logger.debug(f"trace_memory_info {event} "
         #              f"rss: {GB(full_rss) if num_children else GB(rss)} "
         #              f"uss: {GB(rss)} ")
@@ -235,9 +237,14 @@ def trace_memory_info(event, trace_ticks=0, force_garbage_collect=False):
 
         with mem_log_lock:
             MEM_LOG_HEADER = "process,pid,rss,full_rss,uss,event,children,time"
-            with config.open_log_file(
-                MEM_LOG_FILE_NAME, "a", header=MEM_LOG_HEADER, prefix=True
-            ) as log_file:
+            log_file = state.filesystem.open_log_file(
+                MEM_LOG_FILE_NAME,
+                "a",
+                header=MEM_LOG_HEADER,
+                prefix=state.get("log_file_prefix", None),
+            )
+
+            with log_file:
                 print(
                     f"{process_name},"
                     f"{pid},"
@@ -255,7 +262,6 @@ def trace_memory_info(event, trace_ticks=0, force_garbage_collect=False):
 
 
 def get_rss(force_garbage_collect=False, uss=False):
-
     if force_garbage_collect:
         was_disabled = not gc.isenabled()
         if was_disabled:
@@ -276,7 +282,7 @@ def get_rss(force_garbage_collect=False, uss=False):
         return info.rss, 0
 
 
-def shared_memory_size(data_buffers=None):
+def shared_memory_size(data_buffers):
     """
     return total size of the multiprocessing shared memory block in data_buffers
 
@@ -288,7 +294,7 @@ def shared_memory_size(data_buffers=None):
     shared_size = 0
 
     if data_buffers is None:
-        data_buffers = inject.get_injectable("data_buffers", {})
+        data_buffers = {}
 
     for k, data_buffer in data_buffers.items():
         if isinstance(data_buffer, str) and data_buffer.startswith("sh.Dataset:"):

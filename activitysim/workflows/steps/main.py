@@ -1,4 +1,6 @@
 """Naive custom loader without any error handling."""
+from __future__ import annotations
+
 import os
 import signal
 import sys
@@ -19,7 +21,6 @@ def get_pipeline_definition(pipeline_name, parent):
         with open(workflow_file) as yaml_file:
             return pypyr.yaml.get_pipeline_yaml(yaml_file)
     else:
-
         return get_pipeline_definition(pipeline_name, parent)
 
 
@@ -51,7 +52,6 @@ def main(args):
         os.environ["NO_RICH"] = "1"
 
     with get_progress():
-
         try:
             import pypyr.log.logger
             import pypyr.pipelinerunner
@@ -59,7 +59,7 @@ def main(args):
             from pypyr.cli import get_args
             from pypyr.config import config
         except ImportError:
-            raise ImportError("activitysim.workflows requires pypyr")
+            raise ImportError("activitysim.workflows requires pypyr") from None
 
         parsed_args = get_args(args)
 

@@ -1,11 +1,13 @@
+from __future__ import annotations
+
+import logging
 import os
 import sys
 
 
 def prog():
-
     from activitysim import __doc__, __version__, workflows
-    from activitysim.cli import CLI, benchmark, create, run
+    from activitysim.cli import CLI, benchmark, create, exercise, run
 
     asim = CLI(version=__version__, description=__doc__)
     asim.add_subcommand(
@@ -32,11 +34,16 @@ def prog():
         exec_func=workflows.main,
         description=workflows.main.__doc__,
     )
+    asim.add_subcommand(
+        name="test",
+        args_func=exercise.add_exercise_args,
+        exec_func=exercise.main,
+        description=exercise.main.__doc__,
+    )
     return asim
 
 
 def main():
-
     # set all these before we import numpy or any other math library
     if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
         os.environ["MKL_NUM_THREADS"] = "1"
@@ -61,10 +68,11 @@ def main():
                 sys.exit(workflows.main(sys.argv[2:]))
         else:
             sys.exit(asim.execute())
-    except Exception:
+    except Exception as err:
         # if we are in the debugger, re-raise the error instead of exiting
         if sys.gettrace() is not None:
             raise
+        logging.exception(err)
         sys.exit(99)
 
 

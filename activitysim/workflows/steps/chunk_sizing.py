@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import warnings
 
 import psutil
@@ -26,7 +28,6 @@ def chunk_sizing(
 
     # if chunk size is set explicitly, use it without regard to other settings
     if chunk_size is None:
-
         if chunk_size_pct_of_available is not None:
             if chunk_size_pct_of_available > 1:
                 chunk_size_pct_of_available /= 100
@@ -43,7 +44,8 @@ def chunk_sizing(
     if chunk_size > total_ram:
         warnings.warn(
             f"chunk size of {chunk_size/ 2**30:.2f}GB exceeds "
-            f"total RAM of {total_ram/ 2**30:.2f}"
+            f"total RAM of {total_ram/ 2**30:.2f}",
+            stacklevel=2,
         )
 
     out = dict(chunk_size=chunk_size)

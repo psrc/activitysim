@@ -1,5 +1,6 @@
 # ActivitySim
 # See full license in LICENSE.txt.
+from __future__ import annotations
 
 import logging
 from builtins import object, range
@@ -8,7 +9,7 @@ import numba as nb
 import numpy as np
 import pandas as pd
 
-from activitysim.core import chunk, pipeline
+from activitysim.core import chunk, configuration, workflow
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +176,6 @@ def _available_run_length_2(
     available[0] = 0
     available[-1] = 0
     for row in range(num_rows):
-
         row_ix = window_row_mapper[window_row_id_values[row]]
         window_row = windows[row_ix]
         for j in range(1, num_cols - 1):
@@ -204,7 +204,6 @@ def _available_run_length_2(
 
 
 def tour_map(persons, tours, tdd_alts, persons_id_col="person_id"):
-
     sigil = {
         "empty": "   ",
         "overlap": "+++",
@@ -250,7 +249,6 @@ def tour_map(persons, tours, tdd_alts, persons_id_col="person_id"):
     window_periods_df = pd.DataFrame(data=window_periods, index=tdd_alts.index)
 
     for keys, nth_tours in tours.groupby(["tour_type", "tour_type_num"], sort=True):
-
         tour_type = keys[0]
         tour_sigil = sigil[tour_type]
 
@@ -352,7 +350,7 @@ class TimeTable(object):
         self.checkpoint_df = None
 
         # series to map window row index value to window row's ordinal index
-        from ..core.fast_mapping import FastMapping
+        from activitysim.core.fast_mapping import FastMapping
 
         self.window_row_ix = FastMapping(
             pd.Series(list(range(len(windows_df.index))), index=windows_df.index)
@@ -378,6 +376,9 @@ class TimeTable(object):
         # we want range index so we can use raw numpy
         assert (tdd_alts_df.index == list(range(tdd_alts_df.shape[0]))).all()
         self.tdd_footprints = np.asanyarray([list(r) for r in w_strings]).astype(int)
+
+        # by default, do not attach state to this object.
+        self.state = None
 
     def begin_transaction(self, transaction_loggers):
         """
@@ -411,6 +412,10 @@ class TimeTable(object):
             tt_windows=self.windows,
         )
 
+    def attach_state(self, state: workflow.State):
+        self.state = state
+        return self
+
     def slice_windows_by_row_id(self, window_row_ids):
         """
         return windows array slice containing rows for specified window_row_ids
@@ -422,7 +427,6 @@ class TimeTable(object):
         return windows
 
     def slice_windows_by_row_id_and_period(self, window_row_ids, periods):
-
         # row ixs of tour_df group rows in windows
         row_ixs = self.window_row_ix.apply_to(window_row_ids)
 
@@ -434,7 +438,6 @@ class TimeTable(object):
         return windows
 
     def get_windows_df(self):
-
         # It appears that assignments into windows write through to underlying pandas table.
         # because we set windows = windows_df.values, and since all the columns are the same type
         # so no need to refresh pandas dataframe, but if we had to it would go here
@@ -442,7 +445,7 @@ class TimeTable(object):
         # assert (self.windows_df.values == self.windows).all()
         return self.windows_df
 
-    def replace_table(self):
+    def replace_table(self, state: workflow.State):
         """
         Save or replace windows_df  DataFrame to pipeline with saved table name
         (specified when object instantiated.)
@@ -464,7 +467,7 @@ class TimeTable(object):
 
         # get windows_df from bottleneck function in case updates to self.person_window
         # do not write through to pandas dataframe
-        pipeline.replace_table(self.windows_table_name, self.get_windows_df())
+        state.add_table(self.windows_table_name, self.get_windows_df())
 
     def tour_available(self, window_row_ids, tdds):
         """
@@ -603,14 +606,12 @@ class TimeTable(object):
         self.windows[row_ixs] = np.bitwise_or(self.windows[row_ixs], footprints)
 
     def pairwise_available(self, window1_row_ids, window2_row_ids):
-
         available1 = (self.slice_windows_by_row_id(window1_row_ids) != I_MIDDLE) * 1
         available2 = (self.slice_windows_by_row_id(window2_row_ids) != I_MIDDLE) * 1
 
         return available1 * available2
 
     def individually_available(self, window_row_ids):
-
         return (self.slice_windows_by_row_id(window_row_ids) != I_MIDDLE) * 1
 
     def adjacent_window_run_length(self, window_row_ids, periods, before):
@@ -632,7 +633,7 @@ class TimeTable(object):
         assert len(window_row_ids) == len(periods)
 
         trace_label = "tt.adjacent_window_run_length"
-        with chunk.chunk_log(trace_label):
+        with chunk.chunk_log(self.state, trace_label) as chunk_sizer:
             available_run_length = _available_run_length_2(
                 self.windows,
                 self.window_row_ix._mapper,
@@ -642,7 +643,9 @@ class TimeTable(object):
                 periods.to_numpy(),
             )
 
-            chunk.log_df(trace_label, "available_run_length", available_run_length)
+            chunk_sizer.log_df(
+                trace_label, "available_run_length", available_run_length
+            )
 
         return pd.Series(available_run_length, index=window_row_ids.index)
 

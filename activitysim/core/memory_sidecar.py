@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import os
 import time
@@ -9,7 +11,6 @@ import psutil
 def record_memory_usage(
     logstream, event="", event_idx=-1, measure_uss=False, measure_cpu=False, pid=None
 ):
-
     if pid is None:
         pid = os.getpid()
     current_process = psutil.Process(pid)

@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import yaml
-from larch import DataFrames, Model
-from larch.util import Dict
 
 from .general import (
     apply_coefficients,
@@ -13,6 +13,14 @@ from .general import (
     dict_of_linear_utility_from_spec,
     remove_apostrophes,
 )
+
+try:
+    import larch
+except ImportError:
+    larch = None
+else:
+    from larch import DataFrames, Model
+    from larch.util import Dict
 
 
 def stop_frequency_data(
@@ -42,8 +50,7 @@ def stop_frequency_data(
         seg_purpose = seg_["primary_purpose"]
         seg_subdir = Path(os.path.join(edb_directory, seg_purpose))
         segment_coef[seg_["primary_purpose"]] = pd.read_csv(
-            seg_subdir / seg_["COEFFICIENTS"],
-            index_col="coefficient_name",
+            seg_subdir / seg_["COEFFICIENTS"], index_col="coefficient_name", comment="#"
         )
 
     for seg in segments:
@@ -89,13 +96,13 @@ def stop_frequency_data(
         seg_purpose = seg["primary_purpose"]
         seg_subdir = Path(os.path.join(edb_directory, seg_purpose))
         coeffs_ = pd.read_csv(
-            seg_subdir / seg["COEFFICIENTS"], index_col="coefficient_name"
+            seg_subdir / seg["COEFFICIENTS"], index_col="coefficient_name", comment="#"
         )
         coeffs_.index = pd.Index(
             [f"{i}_{seg_purpose}" for i in coeffs_.index], name="coefficient_name"
         )
         seg_coefficients.append(coeffs_)
-        spec = pd.read_csv(seg_subdir / "stop_frequency_SPEC_.csv")
+        spec = pd.read_csv(seg_subdir / "stop_frequency_SPEC_.csv", comment="#")
         spec = remove_apostrophes(spec, ["Label"])
         # spec.iloc[:, 3:] = spec.iloc[:, 3:].applymap(lambda x: f"{x}_{seg_purpose}" if not pd.isna(x) else x)
         seg_spec.append(spec)
@@ -144,7 +151,6 @@ def stop_frequency_model(
     models = []
 
     for n in range(len(data.spec)):
-
         coefficients = data.coefficients
         # coef_template = data.coef_template # not used
         spec = data.spec[n]

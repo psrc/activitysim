@@ -122,16 +122,17 @@ def compute_columns(
     _locals_dict.update(tables)
 
     # FIXME a number of asim model preprocessors want skim_dict - should they request it in model_settings.TABLES?
-    try:
-        if state.settings.sharrow:
-            from activitysim.core.flow import skim_dataset_dict  # noqa F401
-            from activitysim.core.skim_dataset import skim_dataset  # noqa F401
+    if state.settings.dict().get("load_skims", "True"):
+        try:
+            if state.settings.sharrow:
+                from activitysim.core.flow import skim_dataset_dict  # noqa F401
+                from activitysim.core.skim_dataset import skim_dataset  # noqa F401
 
-            _locals_dict["skim_dict"] = state.get_injectable("skim_dataset_dict")
-        else:
-            _locals_dict["skim_dict"] = state.get_injectable("skim_dict")
-    except FileNotFoundError:
-        pass  # maybe we don't even need the skims
+                _locals_dict["skim_dict"] = state.get_injectable("skim_dataset_dict")
+            else:
+                _locals_dict["skim_dict"] = state.get_injectable("skim_dict")
+        except FileNotFoundError:
+            pass  # maybe we don't even need the skims
 
     results, trace_results, trace_assigned_locals = assign.assign_variables(
         state,

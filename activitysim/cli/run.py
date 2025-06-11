@@ -392,13 +392,10 @@ def run(args):
 
         else:
             logger.info("run single process simulation")
-            #for x in range(0,2):
-            for year in state.get_global_constants()['YEARS']:
-                state.add_injectable("year", year)
-                state.run(
-                    models=state.settings.models,
-                    resume_after=resume_after,
-                    memory_sidecar_process=memory_sidecar_process,
+            state.run(
+                models=state.settings.models,
+                resume_after=resume_after,
+                memory_sidecar_process=memory_sidecar_process,
                 )
 
             if state.settings.cleanup_pipeline_after_run:

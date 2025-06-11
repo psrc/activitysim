@@ -392,12 +392,12 @@ def run(args):
 
         else:
             logger.info("run single process simulation")
-
-            state.run(
-                models=state.settings.models,
-                resume_after=resume_after,
-                memory_sidecar_process=memory_sidecar_process,
-            )
+            for x in range(0,2):
+                state.run(
+                    models=state.settings.models,
+                    resume_after=resume_after,
+                    memory_sidecar_process=memory_sidecar_process,
+                )
 
             if state.settings.cleanup_pipeline_after_run:
                 state.checkpoint.cleanup()  # has side effect of closing open pipeline

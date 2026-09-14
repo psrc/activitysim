@@ -30,6 +30,7 @@
       ~State.get_dataframe
       ~State.get_dataframe_index_name
       ~State.get_dataset
+      ~State.get_expr_performance_log_file_path
       ~State.get_global_constants
       ~State.get_injectable
       ~State.get_log_file_path
@@ -53,6 +54,7 @@
       ~State.should_save_checkpoint
       ~State.trace_memory_info
       ~State.uncheckpointed_table_names
+      ~State.update_table
    
    
 

@@ -247,19 +247,16 @@ def eval_interaction_utilities(
                 assert alt_id in df.columns
                 expression_values_df = df[[alt_id]]
 
-                # FIXME estimation_requires_chooser_id_in_df_column
-                # estimation requires that chooser_id is either in index or a column of interaction_dataset
-                # so it can be reformatted (melted) and indexed by chooser_id and alt_id
-                # we assume caller has this under control if index is named
-                # bug - location choice has df index_name zone_id but should be person_id????
-                if df.index.name is None:
-                    chooser_id = estimator.get_chooser_id()
+                # Estimation tables need both IDs, regardless of the interaction
+                # dataframe's index name. The index may be the alternative index
+                # (for example, zone_id) rather than the chooser index.
+                chooser_id = getattr(estimator, "chooser_id_column_name", None)
+                if chooser_id is not None:
                     assert chooser_id in df.columns, (
-                        "Expected to find choose_id column '%s' in interaction dataset"
+                        "Expected to find chooser_id column '%s' in interaction dataset"
                         % (chooser_id,)
                     )
-                    assert df.index.name is None
-                    expression_values_df[chooser_id] = df[chooser_id]
+                    expression_values_df[chooser_id] = df[chooser_id].to_numpy()
 
             if isinstance(spec.index, pd.MultiIndex):
                 exprs = spec.index.get_level_values(simulate.SPEC_EXPRESSION_NAME)
@@ -746,8 +743,11 @@ def _interaction_simulate(
     # for every chooser, there will be a row for each alternative
     # index values (non-unique) are from alternatives df
     alt_index_id = estimator.get_alt_id() if estimator else None
-    chooser_index_id = ALT_CHOOSER_ID if log_alt_losers else None
-
+    chooser_index_id = (
+        estimator.get_chooser_id()
+        if estimator
+        else ALT_CHOOSER_ID if log_alt_losers else None
+    )
     if compute_settings is None:
         compute_settings = ComputeSettings()
     if compute_settings.sharrow_skip:

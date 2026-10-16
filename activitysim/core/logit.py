@@ -876,8 +876,14 @@ def interaction_dataset(
 
     # caller may want this to detect utils that make all alts for a chooser unavailable (e.g. -999)
     if chooser_index_id:
-        assert chooser_index_id not in alts_sample
-        alts_sample[chooser_index_id] = np.repeat(choosers.index.values, sample_size)
+        chooser_index_values = np.repeat(choosers.index.values, sample_size)
+        if chooser_index_id in alts_sample:
+            # chooser_index_id may already be present as a chooser column (e.g. when
+            # the chooser index name was also duplicated into a chooser column for
+            # estimation mode) - in that case it should already hold the same values
+            assert (alts_sample[chooser_index_id].values == chooser_index_values).all()
+        else:
+            alts_sample[chooser_index_id] = chooser_index_values
 
     logger.debug("interaction_dataset merged alts_sample %s" % (alts_sample.shape,))
 

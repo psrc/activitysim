@@ -746,7 +746,9 @@ def _interaction_simulate(
     chooser_index_id = (
         estimator.get_chooser_id()
         if estimator
-        else ALT_CHOOSER_ID if log_alt_losers else None
+        else ALT_CHOOSER_ID
+        if log_alt_losers
+        else None
     )
     if compute_settings is None:
         compute_settings = ComputeSettings()

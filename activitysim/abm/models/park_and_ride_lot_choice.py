@@ -334,7 +334,7 @@ def run_park_and_ride_lot_choice(
         locals_dict,
         custom_chooser=None,
         sharrow_enabled=state.settings.sharrow,
-        additional_columns=[locals_dict.get("pnr_lot_dest_col_name", "pnr_zone_id")]
+        additional_columns=[locals_dict.get("pnr_lot_dest_col_name", "pnr_zone_id")],
     )
 
     if estimator:

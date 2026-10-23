@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://psrc.github.io/activitysim/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1000.dev3530.g26382c34d';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1000.dev3532.gcc1944cb4';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -64,8 +64,8 @@
     <link rel="prev" title="Work Location" href="work_location_choice.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1000.dev3530.g26382c34d" />
-    <meta name="docbuild:last-update" content="Oct 14, 2026"/>
+  <meta name="docsearch:version" content="1000.dev3532.gcc1944cb4" />
+    <meta name="docbuild:last-update" content="Oct 23, 2026"/>
   </head>
   
   
@@ -488,6 +488,7 @@ files. For example:</p>
 <span class="nt">COEFFICIENTS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">park_and_ride_lot_choice_coefficients.csv</span>
 <span class="nt">LANDUSE_PNR_SPACES_COLUMN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pnr_spaces</span>
 <span class="nt">LANDUSE_COL_FOR_PNR_ELIGIBLE_DEST</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pnr_eligible_destination</span>
+<span class="nt">ALLOW_ZERO_PROBS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="nt">ITERATE_WITH_TOUR_MODE_CHOICE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
 </div>
@@ -512,6 +513,10 @@ column takes precedence; if neither is supplied, all destinations are eligible.
 This is a destination screen, so the utility specification must still handle
 unavailable paths for individual lot/destination pairs. Filtered-out tours
 receive <code class="docutils literal notranslate"><span class="pre">pnr_zone_id</span> <span class="pre">=</span> <span class="pre">-1</span></code>.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">ALLOW_ZERO_PROBS:</span> <span class="pre">true</span></code> to return <code class="docutils literal notranslate"><span class="pre">pnr_zone_id</span> <span class="pre">=</span> <span class="pre">-1</span></code> when a tour has no
+lot with positive choice probability, including when no zones have positive
+park-and-ride spaces. The default is <code class="docutils literal notranslate"><span class="pre">false</span></code>. The mode-choice specification
+must make park-and-ride modes unavailable for tours with <code class="docutils literal notranslate"><span class="pre">pnr_zone_id</span> <span class="pre">==</span> <span class="pre">-1</span></code>.</p>
 <section id="skims-and-utility-expressions">
 <h3>Skims and Utility Expressions<a class="headerlink" href="#skims-and-utility-expressions" title="Permalink to this heading">#</a></h3>
 <p>The following wrappers are available in lot choice and, when <code class="docutils literal notranslate"><span class="pre">pnr_zone_id</span></code> is
@@ -634,6 +639,7 @@ validated to form a valid model.</p>
 <dt class="field-even">Fields<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ACCEPTED_TOLERANCE" title="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ACCEPTED_TOLERANCE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ACCEPTED_TOLERANCE</span> <span class="pre">(float)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ALLOW_ZERO_PROBS" title="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ALLOW_ZERO_PROBS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ALLOW_ZERO_PROBS</span> <span class="pre">(bool)</span></code></a></p></li>
 <li><p><a class="reference internal" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.CHOOSER_FILTER_EXPR" title="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.CHOOSER_FILTER_EXPR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CHOOSER_FILTER_EXPR</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
 <li><p><a class="reference internal" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.COEFFICIENTS" title="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.COEFFICIENTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COEFFICIENTS</span> <span class="pre">()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.CONSTANTS" title="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.CONSTANTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONSTANTS</span> <span class="pre">()</span></code></a></p></li>
@@ -670,6 +676,19 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ACCEPTED_TOLERANCE">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACCEPTED_TOLERANCE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.95</span></em><a class="headerlink" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ACCEPTED_TOLERANCE" title="Permalink to this definition">#</a></dt>
 <dd><p>Lot is considered full if the lot is at least this percentage full.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_sharrow_skip</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ALLOW_ZERO_PROBS">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ALLOW_ZERO_PROBS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ALLOW_ZERO_PROBS" title="Permalink to this definition">#</a></dt>
+<dd><p>If True, return -1 when a chooser has no lot with positive probability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1139,6 +1158,7 @@ of any model.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings"><code class="docutils literal notranslate"><span class="pre">ParkAndRideLotChoiceSettings</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ACCEPTED_TOLERANCE"><code class="docutils literal notranslate"><span class="pre">ParkAndRideLotChoiceSettings.ACCEPTED_TOLERANCE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.ALLOW_ZERO_PROBS"><code class="docutils literal notranslate"><span class="pre">ParkAndRideLotChoiceSettings.ALLOW_ZERO_PROBS</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.CHOOSER_FILTER_EXPR"><code class="docutils literal notranslate"><span class="pre">ParkAndRideLotChoiceSettings.CHOOSER_FILTER_EXPR</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.COEFFICIENTS"><code class="docutils literal notranslate"><span class="pre">ParkAndRideLotChoiceSettings.COEFFICIENTS</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#activitysim.abm.models.park_and_ride_lot_choice.ParkAndRideLotChoiceSettings.CONSTANTS"><code class="docutils literal notranslate"><span class="pre">ParkAndRideLotChoiceSettings.CONSTANTS</span></code></a></li>
@@ -1209,7 +1229,7 @@ of any model.</p>
       
         <div class="footer-item"><!-- This will display the version of the docs -->
 <p class="last-updated">
-ActivitySim 1000.dev3530+g26382c34d, documentation last updated Oct 14, 2026.<br/>
+ActivitySim 1000.dev3532+gcc1944cb4, documentation last updated Oct 23, 2026.<br/>
 </p></div>
       
         <div class="footer-item">
